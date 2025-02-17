@@ -3,7 +3,6 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or https://opensource.org/license/mit/.
 
-include(GNUInstallDirs)
 include(AddWindowsResources)
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/bitcoin-build-config.h.in bitcoin-build-config.h USE_SOURCE_PERMISSIONS @ONLY)
@@ -172,8 +171,8 @@ target_link_libraries(riecoin_common
     $<$<PLATFORM_ID:Windows>:ws2_32>
 )
 
+include(InstallBinaryComponent)
 
-set(installable_targets)
 if(ENABLE_WALLET)
   add_subdirectory(wallet)
 
@@ -191,7 +190,7 @@ if(ENABLE_WALLET)
       riecoin_util
       Boost::headers
     )
-    list(APPEND installable_targets riecoin-wallet)
+    install_binary_component(riecoin-wallet HAS_MANPAGE)
   endif()
 endif()
 
@@ -320,7 +319,7 @@ if(BUILD_DAEMON)
     riecoin_node
     $<TARGET_NAME_IF_EXISTS:riecoin_wallet>
   )
-  list(APPEND installable_targets riecoind)
+  install_binary_component(riecoind HAS_MANPAGE)
 endif()
 if(WITH_MULTIPROCESS AND BUILD_DAEMON)
   add_executable(bitcoin-node
@@ -333,7 +332,7 @@ if(WITH_MULTIPROCESS AND BUILD_DAEMON)
     bitcoin_ipc
     $<TARGET_NAME_IF_EXISTS:riecoin_wallet>
   )
-  list(APPEND installable_targets bitcoin-node)
+  install_binary_component(bitcoin-node)
 endif()
 
 if(WITH_MULTIPROCESS AND BUILD_TESTS)
@@ -376,7 +375,7 @@ if(BUILD_CLI)
     libevent::core
     libevent::extra
   )
-  list(APPEND installable_targets riecoin-cli)
+  install_binary_component(riecoin-cli HAS_MANPAGE)
 endif()
 
 
@@ -389,7 +388,7 @@ if(BUILD_TX)
     riecoin_util
     univalue
   )
-  list(APPEND installable_targets riecoin-tx)
+  install_binary_component(riecoin-tx HAS_MANPAGE)
 endif()
 
 
@@ -434,18 +433,4 @@ endif()
 
 if(BUILD_FUZZ_BINARY)
   add_subdirectory(test/fuzz)
-endif()
-
-
-install(TARGETS ${installable_targets}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-unset(installable_targets)
-
-if(INSTALL_MAN)
-  # TODO: these stubs are no longer needed. man pages should be generated at install time.
-  install(DIRECTORY ../doc/man/
-    DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
-    FILES_MATCHING PATTERN *.1
-  )
 endif()

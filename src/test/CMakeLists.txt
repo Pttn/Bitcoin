@@ -215,6 +215,4 @@ endfunction()
 
 add_all_test_targets()
 
-install(TARGETS test_riecoin
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+install_binary_component(test_riecoin)
