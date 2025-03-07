@@ -103,6 +103,10 @@ set_target_properties(riecoinkernel PROPERTIES
   CXX_VISIBILITY_PRESET default
 )
 
+# Add a convenience libriecoinkernel target as a synonym for riecoinkernel
+add_custom_target(libriecoinkernel)
+add_dependencies(libriecoinkernel riecoinkernel)
+
 # When building the static library, install all static libraries the
 # riecoinkernel depends on.
 if(NOT BUILD_SHARED_LIBS)
@@ -111,6 +115,7 @@ if(NOT BUILD_SHARED_LIBS)
     get_target_property(linked_libraries ${target} LINK_LIBRARIES)
     foreach(dep ${linked_libraries})
       if(TARGET ${dep})
+        add_dependencies(libriecoinkernel ${dep})
         get_target_property(dep_type ${dep} TYPE)
         if(dep_type STREQUAL "STATIC_LIBRARY")
           list(APPEND ${libs_out} ${dep})
@@ -132,10 +137,6 @@ endif()
 
 configure_file(${PROJECT_SOURCE_DIR}/libbitcoinkernel.pc.in ${PROJECT_BINARY_DIR}/libbitcoinkernel.pc @ONLY)
 install(FILES ${PROJECT_BINARY_DIR}/libbitcoinkernel.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig" COMPONENT libriecoinkernel)
-
-# Add a convenience libriecoinkernel target as a synonym for bitcoinkernel.
-add_custom_target(libriecoinkernel)
-add_dependencies(libriecoinkernel riecoinkernel)
 
 install(TARGETS riecoinkernel
   RUNTIME
