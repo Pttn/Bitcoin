@@ -236,6 +236,7 @@ BASE_SCRIPTS = [
     'example_test.py',
     'mempool_truc.py',
     'wallet_multisig_descriptor_psbt.py',
+    'wallet_miniscript_decaying_multisig_descriptor_psbt.py',
     'wallet_txn_doublespend.py',
     # 'wallet_txn_clone.py --mineblock', # Test might not work with Bech32/Bech32M.
     'feature_notifications.py',
