@@ -10,11 +10,11 @@ import tempfile
 import argparse
 
 BINARIES = [
-'src/riecoind',
-'src/riecoin-cli',
-'src/riecoin-tx',
-'src/riecoin-wallet',
-'src/qt/riecoin-qt',
+'bin/riecoind',
+'bin/riecoin-cli',
+'bin/riecoin-tx',
+'bin/riecoin-wallet',
+'bin/riecoin-qt',
 ]
 
 parser = argparse.ArgumentParser(
