@@ -17,11 +17,16 @@ from test_framework.blocktools import (
         create_block,
         create_coinbase
 )
+from test_framework.compressor import (
+    compress_amount,
+)
 from test_framework.messages import (
     CBlockHeader,
     from_hex,
     msg_headers,
-    tx_from_hex
+    tx_from_hex,
+    ser_varint,
+    MAX_MONEY,
 )
 from test_framework.p2p import (
     P2PInterface,
@@ -139,7 +144,14 @@ class AssumeutxoTest(BitcoinTestFramework):
             [b"\x81", 34, "bb26b06d0b856c27ac6e6290f3e83d4e83dbe06df8151c04258642cb0462088a", None],  # wrong coin code VARINT
             [b"\x80", 34, "a82c7cf3d3febd38a56bdec9f7653bc2487b70499ed14d2a3ec24067bb14b18e", None],  # another wrong coin code
             [b"\x84\x58", 34, None, "Bad snapshot data after deserializing 0 coins"],  # wrong coin case with height 364 and coinbase 0
-            [b"\xCA\xD2\x8F\x5A", 39, None, "Bad snapshot data after deserializing 0 coins - bad tx out value"],  # Amount exceeds MAX_MONEY
+            [
+                # compressed txout value + scriptpubkey
+                ser_varint(compress_amount(MAX_MONEY + 1)) + ser_varint(0),
+                # txid + coins per txid + vout + coin height
+                32 + 1 + 1 + 2,
+                None,
+                "Bad snapshot data after deserializing 0 coins - bad tx out value"
+            ],  # Amount exceeds MAX_MONEY
         ]
 
         for content, offset, wrong_hash, custom_message in cases:
