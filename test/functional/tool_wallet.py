@@ -6,7 +6,6 @@
 """Test bitcoin-wallet."""
 
 import os
-import platform
 import random
 import stat
 import string
