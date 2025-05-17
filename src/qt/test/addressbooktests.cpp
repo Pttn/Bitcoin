@@ -84,12 +84,11 @@ void TestAddAddressesToSendBook(interfaces::Node& node)
         wallet->SetupDescriptorScriptPubKeyMans();
     }
 
-    auto build_address = [&wallet]() {
+    auto build_address{[]() {
         CKey key = GenerateRandomKey();
         CTxDestination dest(WitnessV1Taproot(XOnlyPubKey(key.GetPubKey())));
-
         return std::make_pair(dest, QString::fromStdString(EncodeDestination(dest)));
-    };
+    }};
 
     CTxDestination r_key_dest, s_key_dest;
 

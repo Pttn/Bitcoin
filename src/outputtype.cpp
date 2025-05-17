@@ -10,9 +10,8 @@
 #include <script/script.h>
 #include <script/sign.h>
 #include <script/signingprovider.h>
-#include <util/vector.h>
 
-#include <assert.h>
+#include <cassert>
 #include <optional>
 #include <string>
 
