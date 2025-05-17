@@ -208,6 +208,7 @@ if(ENABLE_WALLET)
       wallet/wallettool.cpp
     )
     add_windows_resources(riecoin-wallet riecoin-wallet-res.rc)
+    add_windows_application_manifest(riecoin-wallet)
     target_link_libraries(riecoin-wallet
       core_interface
       riecoin_wallet
@@ -340,6 +341,7 @@ if(BUILD_DAEMON)
     init/bitcoind.cpp
   )
   add_windows_resources(riecoind riecoind-res.rc)
+  add_windows_application_manifest(riecoind)
   target_link_libraries(riecoind
     core_interface
     riecoin_node
@@ -393,6 +395,7 @@ target_link_libraries(riecoin_cli
 if(BUILD_CLI)
   add_executable(riecoin-cli bitcoin-cli.cpp)
   add_windows_resources(riecoin-cli riecoin-cli-res.rc)
+  add_windows_application_manifest(riecoin-cli)
   target_link_libraries(riecoin-cli
     core_interface
     riecoin_cli
@@ -408,6 +411,7 @@ endif()
 if(BUILD_TX)
   add_executable(riecoin-tx bitcoin-tx.cpp)
   add_windows_resources(riecoin-tx riecoin-tx-res.rc)
+  add_windows_application_manifest(riecoin-tx)
   target_link_libraries(riecoin-tx
     core_interface
     riecoin_common

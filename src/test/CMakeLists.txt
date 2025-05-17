@@ -141,6 +141,8 @@ target_raw_data_sources(test_riecoin NAMESPACE test::data
   data/asmap.raw
 )
 
+add_windows_application_manifest(test_riecoin)
+
 target_link_libraries(test_riecoin
   core_interface
   test_util

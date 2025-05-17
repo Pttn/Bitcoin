@@ -257,6 +257,7 @@ add_executable(riecoin-qt
 )
 
 add_windows_resources(riecoin-qt res/riecoin-qt-res.rc)
+add_windows_application_manifest(riecoin-qt)
 
 target_link_libraries(riecoin-qt
   core_interface
