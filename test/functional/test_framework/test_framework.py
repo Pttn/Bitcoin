@@ -976,6 +976,11 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         if not self.is_external_signer_compiled():
             raise SkipTest("external signer support has not been compiled.")
 
+    def skip_if_running_under_valgrind(self):
+        """Skip the running test if Valgrind is being used."""
+        if self.options.valgrind:
+            raise SkipTest("This test is not compatible with Valgrind.")
+
     def is_cli_compiled(self):
         """Checks whether riecoin-cli was compiled."""
         return self.config["components"].getboolean("ENABLE_CLI")
