@@ -255,7 +255,7 @@ bool CachedTxIsFromMe(const CWallet& wallet, const CWalletTx& wtx, const isminef
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-bool CachedTxIsTrusted(const CWallet& wallet, const CWalletTx& wtx, std::set<uint256>& trusted_parents)
+bool CachedTxIsTrusted(const CWallet& wallet, const CWalletTx& wtx, std::set<Txid>& trusted_parents)
 {
     AssertLockHeld(wallet.cs_wallet);
     if (wtx.isConfirmed()) return true;
@@ -286,7 +286,7 @@ bool CachedTxIsTrusted(const CWallet& wallet, const CWalletTx& wtx, std::set<uin
 
 bool CachedTxIsTrusted(const CWallet& wallet, const CWalletTx& wtx)
 {
-    std::set<uint256> trusted_parents;
+    std::set<Txid> trusted_parents;
     LOCK(wallet.cs_wallet);
     return CachedTxIsTrusted(wallet, wtx, trusted_parents);
 }
@@ -297,7 +297,7 @@ Balance GetBalance(const CWallet& wallet, const int min_depth, bool avoid_reuse)
     isminefilter reuse_filter = avoid_reuse ? ISMINE_NO : ISMINE_USED;
     {
         LOCK(wallet.cs_wallet);
-        std::set<uint256> trusted_parents;
+        std::set<Txid> trusted_parents;
         for (const auto& entry : wallet.mapWallet)
         {
             const CWalletTx& wtx = entry.second;
@@ -322,7 +322,7 @@ std::map<CTxDestination, CAmount> GetAddressBalances(const CWallet& wallet)
 
     {
         LOCK(wallet.cs_wallet);
-        std::set<uint256> trusted_parents;
+        std::set<Txid> trusted_parents;
         for (const auto& walletEntry : wallet.mapWallet)
         {
             const CWalletTx& wtx = walletEntry.second;
@@ -345,7 +345,7 @@ std::map<CTxDestination, CAmount> GetAddressBalances(const CWallet& wallet)
                 if(!ExtractDestination(output.scriptPubKey, addr))
                     continue;
 
-                CAmount n = wallet.IsSpent(COutPoint(Txid::FromUint256(walletEntry.first), i)) ? 0 : output.nValue;
+                CAmount n = wallet.IsSpent(COutPoint(walletEntry.first, i)) ? 0 : output.nValue;
                 balances[addr] += n;
             }
         }
