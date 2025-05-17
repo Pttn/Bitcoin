@@ -11,8 +11,9 @@
 namespace wallet {
 RPCHelpMan walletpassphrase()
 {
-    return RPCHelpMan{"walletpassphrase",
-                "\nStores the wallet decryption key in memory for 'timeout' seconds.\n"
+    return RPCHelpMan{
+        "walletpassphrase",
+        "Stores the wallet decryption key in memory for 'timeout' seconds.\n"
                 "This is needed prior to performing transactions related to private keys such as sending Riecoins\n"
             "\nNote:\n"
             "Issuing the walletpassphrase command while the wallet is already unlocked will set a new unlock\n"
@@ -115,8 +116,9 @@ RPCHelpMan walletpassphrase()
 
 RPCHelpMan walletpassphrasechange()
 {
-    return RPCHelpMan{"walletpassphrasechange",
-                "\nChanges the wallet passphrase from 'oldpassphrase' to 'newpassphrase'.\n",
+    return RPCHelpMan{
+        "walletpassphrasechange",
+        "Changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'.\n",
                 {
                     {"oldpassphrase", RPCArg::Type::STR, RPCArg::Optional::NO, "The current passphrase"},
                     {"newpassphrase", RPCArg::Type::STR, RPCArg::Optional::NO, "The new passphrase"},
@@ -174,8 +176,9 @@ RPCHelpMan walletpassphrasechange()
 
 RPCHelpMan walletlock()
 {
-    return RPCHelpMan{"walletlock",
-                "\nRemoves the wallet encryption key from memory, locking the wallet.\n"
+    return RPCHelpMan{
+        "walletlock",
+        "Removes the wallet encryption key from memory, locking the wallet.\n"
                 "After calling this method, you will need to call walletpassphrase again\n"
                 "before being able to call any methods which require the wallet to be unlocked.\n",
                 {},
@@ -216,10 +219,11 @@ RPCHelpMan walletlock()
 
 RPCHelpMan encryptwallet()
 {
-    return RPCHelpMan{"encryptwallet",
-                "\nEncrypts the wallet with 'passphrase'. This is for first time encryption.\n"
-                "After this, any calls that interact with private keys such as sending or signing \n"
-                "will require the passphrase to be set prior the making these calls.\n"
+    return RPCHelpMan{
+        "encryptwallet",
+        "Encrypts the wallet with 'passphrase'. This is for first time encryption.\n"
+        "After this, any calls that interact with private keys such as sending or signing \n"
+        "will require the passphrase to be set prior to making these calls.\n"
                 "Use the walletpassphrase call for this, and then walletlock call.\n"
                 "If the wallet is already encrypted, use the walletpassphrasechange call.\n"
                 "** IMPORTANT **\n"
