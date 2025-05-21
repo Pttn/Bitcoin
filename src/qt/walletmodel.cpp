@@ -596,5 +596,11 @@ uint256 WalletModel::getLastBlockProcessed() const
 
 CAmount WalletModel::getAvailableBalance(const CCoinControl* control)
 {
-    return control && control->HasSelected() ? wallet().getAvailableBalance(*control) : getCachedBalance().balance;
+    // No selected coins, return the cached balance
+    if (!control || !control->HasSelected()) {
+        const interfaces::WalletBalances& balances = getCachedBalance();
+        return balances.balance;
+    }
+    // Fetch balance from the wallet, taking into account the selected coins
+    return wallet().getAvailableBalance(*control);
 }

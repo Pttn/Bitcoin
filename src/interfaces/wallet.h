@@ -366,7 +366,8 @@ struct WalletBalances
 
     bool balanceChanged(const WalletBalances& prev) const
     {
-        return balance != prev.balance || unconfirmed_balance != prev.unconfirmed_balance || immature_balance != prev.immature_balance;
+        return balance != prev.balance || unconfirmed_balance != prev.unconfirmed_balance ||
+               immature_balance != prev.immature_balance;
     }
 };
 

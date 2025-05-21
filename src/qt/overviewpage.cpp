@@ -200,6 +200,7 @@ void OverviewPage::setBalance(const interfaces::WalletBalances& balances)
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
     bool showImmature = balances.immature_balance != 0;
+
     ui->labelImmature->setVisible(showImmature);
     ui->labelImmatureText->setVisible(showImmature);
 }

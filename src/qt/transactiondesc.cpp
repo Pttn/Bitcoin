@@ -149,7 +149,7 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
                     strHTML += "<b>" + tr("From") + ":</b> " + tr("unknown") + "<br>";
                     strHTML += "<b>" + tr("To") + ":</b> ";
                     strHTML += GUIUtil::HtmlEscape(rec->address);
-                    QString addressOwned = ismine == ISMINE_SPENDABLE ? tr("own address") : tr("watch-only");
+                    QString addressOwned = tr("own address");
                     if (!name.empty())
                         strHTML += " (" + addressOwned + ", " + tr("label") + ": " + GUIUtil::HtmlEscape(name) + ")";
                     else
@@ -217,7 +217,6 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
 
         if (fAllFromMe)
         {
-            //
             // Debit
             //
             auto mine = wtx.txout_is_mine.begin();
