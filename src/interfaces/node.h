@@ -1,5 +1,5 @@
-// Copyright (c) 2018-2022 The Bitcoin Core developers
-// Copyright (c) 2013-present The Riecoin developers
+// Copyright (c) 2018-present The Bitcoin Core developers
+// Copyright (c) 2018-present The Riecoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,13 +7,13 @@
 #define BITCOIN_INTERFACES_NODE_H
 
 #include <common/settings.h>
-#include <consensus/amount.h>          // For CAmount
-#include <logging.h>                   // For BCLog::CategoryMask
-#include <net.h>                       // For NodeId
-#include <net_types.h>                 // For banmap_t
-#include <netaddress.h>                // For Network
-#include <netbase.h>                   // For ConnectionDirection
-#include <support/allocators/secure.h> // For SecureString
+#include <consensus/amount.h>
+#include <logging.h>
+#include <net.h>
+#include <net_types.h>
+#include <netaddress.h>
+#include <netbase.h>
+#include <support/allocators/secure.h>
 #include <util/translation.h>
 
 #include <functional>

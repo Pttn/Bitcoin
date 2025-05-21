@@ -94,6 +94,7 @@
 #include <walletinitinterface.h>
 
 #include <algorithm>
+#include <cerrno>
 #include <condition_variable>
 #include <cstdint>
 #include <cstdio>
@@ -105,7 +106,6 @@
 #include <vector>
 
 #ifndef WIN32
-#include <cerrno>
 #include <signal.h>
 #include <sys/stat.h>
 #endif
