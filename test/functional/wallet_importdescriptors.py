@@ -605,7 +605,8 @@ class ImportDescriptorsTest(BitcoinTestFramework):
 
         self.log.info("Under P2SH, multisig are standard with up to 15 "
                       "compressed keys")
-        self.nodes[1].createwallet(wallet_name='multi_priv_big_legacy', blank=True)
+        self.nodes[1].createwallet(wallet_name='multi_priv_big_legacy',
+                                   blank=True)
         multi_priv_big = self.nodes[1].get_wallet_rpc('multi_priv_big_legacy')
         res = multi_priv_big.importdescriptors([
         {
@@ -720,9 +721,9 @@ class ImportDescriptorsTest(BitcoinTestFramework):
         assert_equal(temp_wallet.getbalance(), encrypted_wallet.getbalance())
 
         self.log.info("Multipath descriptors")
-        self.nodes[1].createwallet(wallet_name="multipath", descriptors=True, blank=True)
+        self.nodes[1].createwallet(wallet_name="multipath", blank=True)
         w_multipath = self.nodes[1].get_wallet_rpc("multipath")
-        self.nodes[1].createwallet(wallet_name="multipath_split", descriptors=True, blank=True)
+        self.nodes[1].createwallet(wallet_name="multipath_split", blank=True)
         w_multisplit = self.nodes[1].get_wallet_rpc("multipath_split")
         timestamp = int(time.time())
 
