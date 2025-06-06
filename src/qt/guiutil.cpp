@@ -5,10 +5,10 @@
 
 #include <qt/guiutil.h>
 
-#include <qt/bitcoinaddressvalidator.h>
-#include <qt/bitcoinunits.h>
 #include <qt/platformstyle.h>
 #include <qt/qvalidatedlineedit.h>
+#include <qt/riecoinaddressvalidator.h>
+#include <qt/riecoinunits.h>
 #include <qt/sendcoinsrecipient.h>
 
 #include <addresstype.h>

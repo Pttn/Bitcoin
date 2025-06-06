@@ -160,7 +160,7 @@ if(ENABLE_WALLET)
 endif()
 
 if(ENABLE_IPC)
-  target_link_libraries(bitcoin_ipc_test
+  target_link_libraries(riecoin_ipc_test
     PRIVATE
       core_interface
       univalue
@@ -171,7 +171,7 @@ if(ENABLE_IPC)
     PRIVATE
       ipc_tests.cpp
   )
-  target_link_libraries(test_riecoin bitcoin_ipc_test bitcoin_ipc)
+  target_link_libraries(test_riecoin riecoin_ipc_test riecoin_ipc)
 endif()
 
 function(add_boost_test source_file)

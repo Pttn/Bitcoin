@@ -10,6 +10,7 @@ add_library(riecoin_util STATIC EXCLUDE_FROM_ALL
   bytevectorhash.cpp
   chaintype.cpp
   check.cpp
+  exec.cpp
   exception.cpp
   feefrac.cpp
   fs.cpp

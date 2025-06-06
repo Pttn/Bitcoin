@@ -2,11 +2,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_BITCOINAMOUNTFIELD_H
-#define BITCOIN_QT_BITCOINAMOUNTFIELD_H
+#ifndef RIECOIN_QT_RIECOINAMOUNTFIELD_H
+#define RIECOIN_QT_RIECOINAMOUNTFIELD_H
 
 #include <consensus/amount.h>
-#include <qt/bitcoinunits.h>
+#include <qt/riecoinunits.h>
 
 #include <QWidget>
 
@@ -82,4 +82,4 @@ private Q_SLOTS:
 
 };
 
-#endif // BITCOIN_QT_BITCOINAMOUNTFIELD_H
+#endif // RIECOIN_QT_RIECOINAMOUNTFIELD_H

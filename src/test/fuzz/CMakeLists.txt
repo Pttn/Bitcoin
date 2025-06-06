@@ -134,9 +134,9 @@ target_link_libraries(fuzz
   core_interface
   fuzzer_interface
   test_fuzz
-  bitcoin_cli
-  bitcoin_common
-  bitcoin_util
+  riecoin_cli
+  riecoin_common
+  riecoin_util
   minisketch
   leveldb
   univalue

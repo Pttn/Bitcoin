@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_BITCOIN_H
-#define BITCOIN_QT_BITCOIN_H
+#ifndef RIECOIN_QT_RIECOIN_H
+#define RIECOIN_QT_RIECOIN_H
 
-#include <bitcoin-build-config.h> // IWYU pragma: keep
+#include <riecoin-build-config.h> // IWYU pragma: keep
 
 #include <interfaces/node.h>
 #include <qt/initexecutor.h>
@@ -107,4 +107,4 @@ private:
 
 int GuiMain(int argc, char* argv[]);
 
-#endif // BITCOIN_QT_BITCOIN_H
+#endif // RIECOIN_QT_RIECOIN_H

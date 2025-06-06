@@ -3,13 +3,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <bitcoin-build-config.h> // IWYU pragma: keep
+#include <riecoin-build-config.h> // IWYU pragma: keep
 
 #include <qt/optionsmodel.h>
 
-#include <qt/bitcoinunits.h>
 #include <qt/guiconstants.h>
 #include <qt/guiutil.h>
+#include <qt/riecoinunits.h>
 
 #include <common/args.h>
 #include <interfaces/node.h>

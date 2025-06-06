@@ -3,18 +3,18 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <bitcoin-build-config.h> // IWYU pragma: keep
+#include <riecoin-build-config.h> // IWYU pragma: keep
 
 #include <qt/sendcoinsdialog.h>
 #include <qt/forms/ui_sendcoinsdialog.h>
 
 #include <qt/addresstablemodel.h>
-#include <qt/bitcoinunits.h>
 #include <qt/clientmodel.h>
 #include <qt/coincontroldialog.h>
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
 #include <qt/platformstyle.h>
+#include <qt/riecoinunits.h>
 #include <qt/sendcoinsentry.h>
 
 #include <chainparams.h>

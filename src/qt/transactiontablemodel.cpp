@@ -6,12 +6,12 @@
 #include <qt/transactiontablemodel.h>
 
 #include <qt/addresstablemodel.h>
-#include <qt/bitcoinunits.h>
 #include <qt/clientmodel.h>
 #include <qt/guiconstants.h>
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
 #include <qt/platformstyle.h>
+#include <qt/riecoinunits.h>
 #include <qt/transactiondesc.h>
 #include <qt/transactionrecord.h>
 #include <qt/walletmodel.h>

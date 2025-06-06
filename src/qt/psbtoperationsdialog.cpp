@@ -11,10 +11,10 @@
 #include <node/psbt.h>
 #include <node/types.h>
 #include <policy/policy.h>
-#include <qt/bitcoinunits.h>
 #include <qt/forms/ui_psbtoperationsdialog.h>
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
+#include <qt/riecoinunits.h>
 #include <util/fs.h>
 #include <util/strencodings.h>
 

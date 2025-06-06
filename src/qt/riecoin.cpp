@@ -3,9 +3,9 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <bitcoin-build-config.h> // IWYU pragma: keep
+#include <riecoin-build-config.h> // IWYU pragma: keep
 
-#include <qt/bitcoin.h>
+#include <qt/riecoin.h>
 
 #include <chainparams.h>
 #include <common/args.h>
@@ -19,7 +19,6 @@
 #include <node/context.h>
 #include <node/interface_ui.h>
 #include <noui.h>
-#include <qt/bitcoingui.h>
 #include <qt/clientmodel.h>
 #include <qt/guiconstants.h>
 #include <qt/guiutil.h>
@@ -28,6 +27,7 @@
 #include <qt/networkstyle.h>
 #include <qt/optionsmodel.h>
 #include <qt/platformstyle.h>
+#include <qt/riecoingui.h>
 #include <qt/splashscreen.h>
 #include <qt/utilitydialog.h>
 #include <qt/winshutdownmonitor.h>
@@ -490,8 +490,8 @@ int GuiMain(int argc, char* argv[])
     // Do not refer to data directory yet, this can be overridden by Intro::pickDataDirectory
 
     /// 1. Basic Qt initialization (not dependent on parameters or configuration)
-    Q_INIT_RESOURCE(bitcoin);
-    Q_INIT_RESOURCE(bitcoin_locale);
+    Q_INIT_RESOURCE(riecoin);
+    Q_INIT_RESOURCE(riecoin_locale);
 
 #if defined(QT_QPA_PLATFORM_ANDROID)
     QApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);

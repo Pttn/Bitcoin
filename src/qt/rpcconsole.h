@@ -5,7 +5,7 @@
 #ifndef BITCOIN_QT_RPCCONSOLE_H
 #define BITCOIN_QT_RPCCONSOLE_H
 
-#include <bitcoin-build-config.h> // IWYU pragma: keep
+#include <riecoin-build-config.h> // IWYU pragma: keep
 
 #include <qt/guiutil.h>
 #include <qt/peertablemodel.h>

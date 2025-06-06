@@ -3,14 +3,14 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_BITCOINGUI_H
-#define BITCOIN_QT_BITCOINGUI_H
+#ifndef RIECOIN_QT_RIECOINGUI_H
+#define RIECOIN_QT_RIECOINGUI_H
 
-#include <bitcoin-build-config.h> // IWYU pragma: keep
+#include <riecoin-build-config.h> // IWYU pragma: keep
 
-#include <qt/bitcoinunits.h>
 #include <qt/guiutil.h>
 #include <qt/optionsdialog.h>
+#include <qt/riecoinunits.h>
 
 #include <consensus/amount.h>
 
@@ -345,4 +345,4 @@ private Q_SLOTS:
     void onMenuSelection(QAction* action);
 };
 
-#endif // BITCOIN_QT_BITCOINGUI_H
+#endif // RIECOIN_QT_RIECOINGUI_H
