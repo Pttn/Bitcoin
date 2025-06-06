@@ -336,6 +336,8 @@ target_link_libraries(riecoin_node
 # Riecoin wrapper executable that can call other executables.
 if(BUILD_BITCOIN_BIN)
   add_executable(riecoin riecoin.cpp)
+  add_windows_resources(riecoin riecoin-res.rc)
+  add_windows_application_manifest(riecoin)
   target_link_libraries(riecoin core_interface riecoin_util)
   install_binary_component(riecoin)
 endif()
