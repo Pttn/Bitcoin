@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-# Copyright (c) 2022 The Bitcoin Core developers
+# Copyright (c) 2022-present The Bitcoin Core developers
 # Copyright (c) 2013-present The Riecoin developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -59,9 +60,11 @@ for relpath in BINARIES:
             print(f'{abspath} not found or not an executable', file=sys.stderr)
             sys.exit(1)
     # take first line (which must contain version)
-    verstr = r.stdout.splitlines()[0]
-    # last word of line is the actual version e.g. v22.99.0-5c6b3d5b3508
-    verstr = verstr.split()[-1]
+    output = r.stdout.splitlines()[0]
+    # find the version e.g. 2512.1-ce771726f3e7
+    search = re.search(r"[0-9]\S+", output)
+    assert search
+    verstr = search.group(0)
     # remaining lines are copyright
     copyright = r.stdout.split('\n')[1:]
 

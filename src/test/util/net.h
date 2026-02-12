@@ -40,6 +40,8 @@ struct ConnmanTestMsg : public CConnman {
         m_msgproc = msgproc;
     }
 
+    void SetAddrman(AddrMan& in) { addrman = in; }
+
     void SetPeerConnectTimeout(std::chrono::seconds timeout)
     {
         m_peer_connect_timeout = timeout;
@@ -99,7 +101,7 @@ struct ConnmanTestMsg : public CConnman {
 
     bool ProcessMessagesOnce(CNode& node) EXCLUSIVE_LOCKS_REQUIRED(NetEventsInterface::g_msgproc_mutex)
     {
-        return m_msgproc->ProcessMessages(&node, flagInterruptMsgProc);
+        return m_msgproc->ProcessMessages(node, flagInterruptMsgProc);
     }
 
     void NodeReceiveMsgBytes(CNode& node, std::span<const uint8_t> msg_bytes, bool& complete) const;
@@ -143,6 +145,7 @@ constexpr ConnectionType ALL_CONNECTION_TYPES[]{
     ConnectionType::FEELER,
     ConnectionType::BLOCK_RELAY,
     ConnectionType::ADDR_FETCH,
+    ConnectionType::PRIVATE_BROADCAST,
 };
 
 constexpr auto ALL_NETWORKS = std::array{

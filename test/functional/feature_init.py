@@ -4,6 +4,7 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Tests related to node initialization."""
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import os
 import platform
@@ -30,10 +31,17 @@ class InitTest(BitcoinTestFramework):
         self.num_nodes = 1
         self.uses_wallet = None
 
-    def init_stress_test(self):
+    def check_clean_start(self, node, extra_args):
+        """Ensure that node restarts successfully after various interrupts."""
+        node.start(extra_args)
+        node.wait_for_rpc_connection()
+        height = node.getblockcount()
+        assert_equal(200, height)
+        self.wait_until(lambda: all(i["synced"] and i["best_block_height"] == height for i in node.getindexinfo().values()))
+
+    def init_stress_test_interrupt(self):
         """
         - test terminating initialization after seeing a certain log line.
-        - test removing certain essential files to test startup error paths.
         """
         self.stop_node(0)
         node = self.nodes[0]
@@ -46,22 +54,7 @@ class InitTest(BitcoinTestFramework):
                 os.kill(node.process.pid, signal.CTRL_BREAK_EVENT)
             else:
                 node.process.terminate()
-            node.process.wait()
-
-        def start_expecting_error(err_fragment, args):
-            node.assert_start_raises_init_error(
-                extra_args=args,
-                expected_msg=err_fragment,
-                match=ErrorMatch.PARTIAL_REGEX,
-            )
-
-        def check_clean_start(extra_args):
-            """Ensure that node restarts successfully after various interrupts."""
-            node.start(extra_args)
-            node.wait_for_rpc_connection()
-            height = node.getblockcount()
-            assert_equal(200, height)
-            self.wait_until(lambda: all(i["synced"] and i["best_block_height"] == height for i in node.getindexinfo().values()))
+            assert_equal(0, node.process.wait())
 
         lines_to_terminate_after = [
             b'Validating signatures for all blocks',
@@ -102,10 +95,23 @@ class InitTest(BitcoinTestFramework):
 
         # Prior to deleting/perturbing index files, start node with all indexes enabled.
         # 'check_clean_start' will ensure indexes are synchronized (i.e., data exists to modify)
-        check_clean_start(args)
+        self.check_clean_start(node, args)
         self.stop_node(0)
 
+    def init_stress_test_removals(self):
+        """
+        - test removing certain essential files to test startup error paths.
+        """
         self.log.info("Test startup errors after removing certain essential files")
+        node = self.nodes[0]
+        args = ['-txindex=1', '-blockfilterindex=1', '-coinstatsindex=1']
+
+        def start_expecting_error(err_fragment, args):
+            node.assert_start_raises_init_error(
+                extra_args=args,
+                expected_msg=err_fragment,
+                match=ErrorMatch.PARTIAL_REGEX,
+            )
 
         deletion_rounds = [
             {
@@ -191,7 +197,7 @@ class InitTest(BitcoinTestFramework):
                 self.log.debug(f"Restoring file from {bak_path} and restarting")
                 Path(bak_path).rename(target_file)
 
-            check_clean_start(args)
+            self.check_clean_start(node, args)
             self.stop_node(0)
 
         self.log.info("Test startup errors after perturbing certain essential files")
@@ -241,9 +247,60 @@ class InitTest(BitcoinTestFramework):
         self.stop_node(0)
         assert not custom_pidfile_absolute.exists()
 
+    def break_wait_test(self):
+        """Test what happens when a break signal is sent during a
+        waitforblockheight RPC call with a long timeout. Ctrl-Break is sent on
+        Windows and SIGTERM is sent on other platforms, to trigger the same node
+        shutdown sequence that would happen if Ctrl-C were pressed in a
+        terminal. (This can be different than the node shutdown sequence that
+        happens when the stop RPC is sent.)
+
+        The waitforblockheight call should be interrupted and return right away,
+        and not time out."""
+
+        self.log.info("Testing waitforblockheight RPC call followed by break signal")
+        node = self.nodes[0]
+
+        if platform.system() == 'Windows':
+            # CREATE_NEW_PROCESS_GROUP prevents python test from exiting
+            # with STATUS_CONTROL_C_EXIT (-1073741510) when break is sent.
+            self.start_node(node.index, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+        else:
+            self.start_node(node.index)
+
+        current_height = node.getblock(node.getbestblockhash())['height']
+
+        with ThreadPoolExecutor(max_workers=1) as ex:
+            # Call waitforblockheight with wait timeout longer than RPC timeout,
+            # so it is possible to distinguish whether it times out or returns
+            # early. If it times out it will throw an exception, and if it
+            # returns early it will return the current block height.
+            self.log.debug(f"Calling waitforblockheight with {self.rpc_timeout} sec RPC timeout")
+            fut = ex.submit(node.waitforblockheight, height=current_height+1, timeout=self.rpc_timeout*1000*2)
+
+            self.wait_until(lambda: any(c["method"] == "waitforblockheight" for c in node.cli.getrpcinfo()["active_commands"]))
+
+            self.log.debug(f"Sending break signal to pid {node.process.pid}")
+            if platform.system() == 'Windows':
+                # Note: CTRL_C_EVENT should not be sent here because unlike
+                # CTRL_BREAK_EVENT it can not be targeted at a specific process
+                # group and may behave unpredictably.
+                node.process.send_signal(signal.CTRL_BREAK_EVENT)
+            else:
+                # Note: signal.SIGINT would work here as well
+                node.process.send_signal(signal.SIGTERM)
+            node.process.wait()
+
+            result = fut.result()
+            self.log.debug(f"waitforblockheight returned {result!r}")
+            assert_equal(result["height"], current_height)
+            node.wait_until_stopped()
+
     def run_test(self):
         self.init_pid_test()
-        self.init_stress_test()
+        self.init_stress_test_interrupt()
+        self.init_stress_test_removals()
+        self.break_wait_test()
 
 
 if __name__ == '__main__':

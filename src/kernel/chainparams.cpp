@@ -10,23 +10,28 @@
 #include <consensus/amount.h>
 #include <consensus/merkle.h>
 #include <consensus/params.h>
+#include <crypto/hex_base.h>
 #include <hash.h>
 #include <kernel/checkpointdata.h>
 #include <kernel/messagestartchars.h>
-#include <logging.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <script/interpreter.h>
 #include <script/script.h>
 #include <uint256.h>
 #include <util/chaintype.h>
+#include <util/log.h>
 #include <util/strencodings.h>
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
-#include <type_traits>
+#include <iterator>
+#include <map>
+#include <span>
+#include <utility>
 
 using namespace util::hex_literals;
 
@@ -72,7 +77,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].threshold = 3024; // 75%
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].period = 4032; // 7 days
 
-        consensus.nMinimumChainWork = uint256{"000000000000000000000000000000000001092d03e4acf640de225f96200000"}; // 2455376
+        consensus.nMinimumChainWork = uint256{"00000000000000000000000000000000000121f5ae10f917650fa89f96200000"}; // 2512042
 
         /** The message start string is designed to be unlikely to occur in normal data. The characters are rarely used upper ASCII, not valid as UTF-8, and produce a large 32-bit integer with any alignment. */
         pchMessageStart[0] = 0xfc;
@@ -112,19 +117,19 @@ public:
         checkpointData = mainCheckpointData;
 
         m_assumeutxo_data = {
-            { // dumptxoutset Utxo.dat rollback '{"rollback": 2452000}'
-                .height = 2382000,
-                .hash_serialized = AssumeutxoHash{uint256{"f112eece53e7caf024d2577542248cc4c47fabca01bbd108098377f1709a9768"}},
-                .m_chain_tx_count = 4641756,
-                .blockhash = uint256{"81205d6309401195a790abe49fa83cc8237f2e57cd62df93711b315ee4523cb0"}
+            { // dumptxoutset Utxo.dat rollback '{"rollback": 2510000}'
+                .height = mainCheckpointData.assumedValidBlockHeight,
+                .hash_serialized = AssumeutxoHash{uint256{"dc7d87ff70339f2305a5a8fef00528f4ca97bb23c980f2522d4399c1f3635c54"}},
+                .m_chain_tx_count = 4783534,
+                .blockhash = mainCheckpointData.assumedValidBlockHash
             }
         };
 
         chainTxData = ChainTxData{
-            // getchaintxstats 65536 81205d6309401195a790abe49fa83cc8237f2e57cd62df93711b315ee4523cb0
-            .nTime    = 1761940473,
-            .tx_count = 4719974,
-            .dTxRate  = 0.007464598636189267,
+            // getchaintxstats 65536 86276d0690eee7b090cf25b471f7591f330e040395bccd2086db17d5fc1fff18
+            .nTime    = 1770616625,
+            .tx_count = 4783534,
+            .dTxRate  = 0.007359826080743852,
         };
     }
 };
@@ -149,7 +154,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].threshold = 3024; // 75%
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].period = 4032; // 7 days
 
-        consensus.nMinimumChainWork = uint256{"0000000000000000000000000000000000000000000bf8692921232f4363a000"}; // 180512
+        consensus.nMinimumChainWork = uint256{"0000000000000000000000000000000000000000000dab6d6fd2c6887b36c000"}; // 208510
 
         pchMessageStart[0] = 0x0e;
         pchMessageStart[1] = 0x09;
@@ -185,19 +190,19 @@ public:
         checkpointData = testCheckpointData;
 
         m_assumeutxo_data = {
-            { // dumptxoutset UtxoTestnet.dat rollback '{"rollback": 178000}'
-                .height = 178000,
+            { // dumptxoutset UtxoTestnet.dat rollback '{"rollback": 206000}'
+                .height = testCheckpointData.assumedValidBlockHeight,
                 .hash_serialized = AssumeutxoHash{uint256{"2505dabf957071b44bafee3d1b5fb8ece1982ff0bd1c748bd03dbb616e8e3b32"}},
-                .m_chain_tx_count = 178014,
-                .blockhash = uint256{"d3a817e17f519106caa781263c26bb03f611801b718c8d2553d42bf953ba2cf1"}
+                .m_chain_tx_count = 206014,
+                .blockhash = testCheckpointData.assumedValidBlockHash
             }
         };
 
         chainTxData = ChainTxData{
-            // getchaintxstats 16384 d3a817e17f519106caa781263c26bb03f611801b718c8d2553d42bf953ba2cf1
-            .nTime    = 1761686202,
-            .tx_count = 178014,
-            .dTxRate  = 0.003343545186429582,
+            // getchaintxstats 16384 c7b944a29fb4f8af7c15116aba7e62c7c20429193cc9d0ffb098d5525f9cfffa
+            .nTime    = 1770146662,
+            .tx_count = 206014,
+            .dTxRate  = 0.003292778537129273,
         };
     }
 };
@@ -276,7 +281,7 @@ public:
                 .blockhash = uint256{"385901ccbd69dff6bbd00065d01fb8a9e464dede7cfe0372443884f9b1dcf6b9"}
             },
             {
-                // For use by test/functional/feature_assumeutxo.py
+                // For use by test/functional/feature_assumeutxo.py and test/functional/tool_bitcoin_chainstate.py
                 .height = 299,
                 .hash_serialized = AssumeutxoHash{uint256{"2caac7b2b7457202c70c0fe1573c9d6caf114d9ef9362de30b8444ef8d636c85"}},
                 .m_chain_tx_count = 334,

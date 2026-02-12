@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2014-2022 The Bitcoin Core developers
+# Copyright (c) 2014-present The Bitcoin Core developers
 # Copyright (c) 2013-present The Riecoin developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -121,7 +121,7 @@ class AbandonConflictTest(BitcoinTestFramework):
         balances = alice.getbalances()['mine']
         assert_equal(balances['untrusted_pending'] + balances['trusted'], newbalance)
         # Also shouldn't show up in listunspent
-        assert not txABC2 in [utxo["txid"] for utxo in alice.listunspent(0)]
+        assert txABC2 not in [utxo["txid"] for utxo in alice.listunspent(0)]
         balance = newbalance
 
         # Abandon original transaction and verify inputs are available again

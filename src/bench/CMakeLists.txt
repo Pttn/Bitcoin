@@ -84,8 +84,4 @@ if(ENABLE_WALLET)
   target_link_libraries(bench_riecoin riecoin_wallet)
 endif()
 
-add_test(NAME bench_sanity_check
-  COMMAND bench_riecoin -sanity-check
-)
-
 install_binary_component(bench_riecoin INTERNAL)

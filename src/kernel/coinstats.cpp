@@ -1,4 +1,4 @@
-// Copyright (c) 2022 The Bitcoin Core developers
+// Copyright (c) 2022-present The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,27 +8,23 @@
 #include <coins.h>
 #include <crypto/muhash.h>
 #include <hash.h>
-#include <logging.h>
 #include <node/blockstorage.h>
 #include <primitives/transaction.h>
 #include <script/script.h>
-#include <serialize.h>
 #include <span.h>
 #include <streams.h>
 #include <sync.h>
-#include <tinyformat.h>
 #include <uint256.h>
 #include <util/check.h>
+#include <util/log.h>
 #include <util/overflow.h>
 #include <validation.h>
 
-#include <cassert>
-#include <iosfwd>
-#include <iterator>
 #include <map>
 #include <memory>
-#include <string>
+#include <span>
 #include <utility>
+#include <version>
 
 namespace kernel {
 

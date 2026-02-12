@@ -8,6 +8,7 @@
 #include <kernel/riecoinkernel.h>
 
 #include <array>
+#include <exception>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -364,6 +365,7 @@ public:
     const CType* get() const { return m_ptr.get(); }
 };
 
+class PrecomputedTransactionData;
 class Transaction;
 class TransactionOutput;
 
@@ -382,7 +384,7 @@ private:
 public:
     bool Verify(int64_t amount,
                 const Transaction& tx_to,
-                std::span<const TransactionOutput> spent_outputs,
+                const PrecomputedTransactionData* precomputed_txdata,
                 unsigned int input_index,
                 ScriptVerificationFlags flags,
                 ScriptVerifyStatus& status) const;
@@ -623,29 +625,30 @@ public:
         : Handle{view} {}
 };
 
+class PrecomputedTransactionData : public Handle<btck_PrecomputedTransactionData, btck_precomputed_transaction_data_copy, btck_precomputed_transaction_data_destroy>
+{
+public:
+    explicit PrecomputedTransactionData(const Transaction& tx_to, std::span<const TransactionOutput> spent_outputs)
+        : Handle{btck_precomputed_transaction_data_create(
+            tx_to.get(),
+            reinterpret_cast<const btck_TransactionOutput**>(
+                const_cast<TransactionOutput*>(spent_outputs.data())),
+            spent_outputs.size())} {}
+};
+
 template <typename Derived>
 bool ScriptPubkeyApi<Derived>::Verify(int64_t amount,
                                       const Transaction& tx_to,
-                                      const std::span<const TransactionOutput> spent_outputs,
+                                      const PrecomputedTransactionData* precomputed_txdata,
                                       unsigned int input_index,
                                       ScriptVerificationFlags flags,
                                       ScriptVerifyStatus& status) const
 {
-    const btck_TransactionOutput** spent_outputs_ptr = nullptr;
-    std::vector<const btck_TransactionOutput*> raw_spent_outputs;
-    if (spent_outputs.size() > 0) {
-        raw_spent_outputs.reserve(spent_outputs.size());
-
-        for (const auto& output : spent_outputs) {
-            raw_spent_outputs.push_back(output.get());
-        }
-        spent_outputs_ptr = raw_spent_outputs.data();
-    }
     auto result = btck_script_pubkey_verify(
         impl(),
         amount,
         tx_to.get(),
-        spent_outputs_ptr, spent_outputs.size(),
+        precomputed_txdata ? precomputed_txdata->get() : nullptr,
         input_index,
         static_cast<btck_ScriptVerificationFlags>(flags),
         reinterpret_cast<btck_ScriptVerifyStatus*>(&status));
@@ -680,7 +683,7 @@ public:
     }
 };
 
-class BlockHashView: public View<btck_BlockHash>, public BlockHashApi<BlockHashView>
+class BlockHashView : public View<btck_BlockHash>, public BlockHashApi<BlockHashView>
 {
 public:
     explicit BlockHashView(const btck_BlockHash* ptr) : View{ptr} {}
@@ -697,6 +700,69 @@ public:
 
     BlockHash(const BlockHashView& view)
         : Handle{view} {}
+};
+
+template <typename Derived>
+class BlockHeaderApi
+{
+private:
+    auto impl() const
+    {
+        return static_cast<const Derived*>(this)->get();
+    }
+
+    friend Derived;
+    BlockHeaderApi() = default;
+
+public:
+    BlockHash Hash() const
+    {
+        return BlockHash{btck_block_header_get_hash(impl())};
+    }
+
+    BlockHashView PrevHash() const
+    {
+        return BlockHashView{btck_block_header_get_prev_hash(impl())};
+    }
+
+    uint32_t Timestamp() const
+    {
+        return btck_block_header_get_timestamp(impl());
+    }
+
+    uint32_t Bits() const
+    {
+        return btck_block_header_get_bits(impl());
+    }
+
+    int32_t Version() const
+    {
+        return btck_block_header_get_version(impl());
+    }
+
+    uint8_t* Nonce() const
+    {
+        return btck_block_header_get_nonce(impl());
+    }
+};
+
+class BlockHeaderView : public View<btck_BlockHeader>, public BlockHeaderApi<BlockHeaderView>
+{
+public:
+    explicit BlockHeaderView(const btck_BlockHeader* ptr) : View{ptr} {}
+};
+
+class BlockHeader : public Handle<btck_BlockHeader, btck_block_header_copy, btck_block_header_destroy>, public BlockHeaderApi<BlockHeader>
+{
+public:
+    explicit BlockHeader(std::span<const std::byte> raw_header)
+        : Handle{btck_block_header_create(reinterpret_cast<const unsigned char*>(raw_header.data()), raw_header.size())} {}
+
+    BlockHeader(const BlockHeaderView& view)
+        : Handle{view} {}
+
+    BlockHeader(btck_BlockHeader* header)
+        : Handle{header} {}
 };
 
 class Block : public Handle<btck_Block, btck_block_copy, btck_block_destroy>
@@ -724,6 +790,11 @@ public:
     BlockHash GetHash() const
     {
         return BlockHash{btck_block_get_hash(get())};
+    }
+
+    BlockHeader GetHeader() const
+    {
+        return BlockHeader{btck_block_get_header(get())};
     }
 
     std::vector<std::byte> ToBytes() const
@@ -783,6 +854,11 @@ public:
     {
     }
 
+    bool operator==(const BlockTreeEntry& other) const
+    {
+        return btck_block_tree_entry_equals(get(), other.get()) != 0;
+    }
+
     std::optional<BlockTreeEntry> GetPrevious() const
     {
         auto entry{btck_block_tree_entry_get_previous(get())};
@@ -803,6 +879,11 @@ public:
     BlockHashView GetHash() const
     {
         return BlockHashView{btck_block_tree_entry_get_block_hash(get())};
+    }
+
+    BlockHeader GetHeader() const
+    {
+        return BlockHeader{btck_block_tree_entry_get_block_header(get())};
     }
 };
 
@@ -826,28 +907,42 @@ public:
     virtual void FatalErrorHandler(std::string_view error) {}
 };
 
-class BlockValidationState
+template <typename Derived>
+class BlockValidationStateApi
 {
 private:
-    const btck_BlockValidationState* m_state;
+    auto impl() const
+    {
+        return static_cast<const Derived*>(this)->get();
+    }
+
+    friend Derived;
+    BlockValidationStateApi() = default;
 
 public:
-    BlockValidationState(const btck_BlockValidationState* state) : m_state{state} {}
-
-    BlockValidationState(const BlockValidationState&) = delete;
-    BlockValidationState& operator=(const BlockValidationState&) = delete;
-    BlockValidationState(BlockValidationState&&) = delete;
-    BlockValidationState& operator=(BlockValidationState&&) = delete;
-
     ValidationMode GetValidationMode() const
     {
-        return static_cast<ValidationMode>(btck_block_validation_state_get_validation_mode(m_state));
+        return static_cast<ValidationMode>(btck_block_validation_state_get_validation_mode(impl()));
     }
 
     BlockValidationResult GetBlockValidationResult() const
     {
-        return static_cast<BlockValidationResult>(btck_block_validation_state_get_block_validation_result(m_state));
+        return static_cast<BlockValidationResult>(btck_block_validation_state_get_block_validation_result(impl()));
     }
+};
+
+class BlockValidationStateView : public View<btck_BlockValidationState>, public BlockValidationStateApi<BlockValidationStateView>
+{
+public:
+    explicit BlockValidationStateView(const btck_BlockValidationState* ptr) : View{ptr} {}
+};
+
+class BlockValidationState : public Handle<btck_BlockValidationState, btck_block_validation_state_copy, btck_block_validation_state_destroy>, public BlockValidationStateApi<BlockValidationState>
+{
+public:
+    explicit BlockValidationState() : Handle{btck_block_validation_state_create()} {}
+
+    BlockValidationState(const BlockValidationStateView& view) : Handle{view} {}
 };
 
 class ValidationInterface
@@ -855,7 +950,7 @@ class ValidationInterface
 public:
     virtual ~ValidationInterface() = default;
 
-    virtual void BlockChecked(Block block, const BlockValidationState state) {}
+    virtual void BlockChecked(Block block, BlockValidationStateView state) {}
 
     virtual void PowValidBlock(BlockTreeEntry entry, Block block) {}
 
@@ -913,7 +1008,7 @@ public:
             btck_ValidationInterfaceCallbacks{
                 .user_data = heap_vi.release(),
                 .user_data_destroy = +[](void* user_data) { delete static_cast<user_type>(user_data); },
-                .block_checked = +[](void* user_data, btck_Block* block, const btck_BlockValidationState* state) { (*static_cast<user_type>(user_data))->BlockChecked(Block{block}, BlockValidationState{state}); },
+                .block_checked = +[](void* user_data, btck_Block* block, const btck_BlockValidationState* state) { (*static_cast<user_type>(user_data))->BlockChecked(Block{block}, BlockValidationStateView{state}); },
                 .pow_valid_block = +[](void* user_data, btck_Block* block, const btck_BlockTreeEntry* entry) { (*static_cast<user_type>(user_data))->PowValidBlock(BlockTreeEntry{entry}, Block{block}); },
                 .block_connected = +[](void* user_data, btck_Block* block, const btck_BlockTreeEntry* entry) { (*static_cast<user_type>(user_data))->BlockConnected(Block{block}, BlockTreeEntry{entry}); },
                 .block_disconnected = +[](void* user_data, btck_Block* block, const btck_BlockTreeEntry* entry) { (*static_cast<user_type>(user_data))->BlockDisconnected(Block{block}, BlockTreeEntry{entry}); },
@@ -939,8 +1034,9 @@ public:
 class ChainstateManagerOptions : public UniqueHandle<btck_ChainstateManagerOptions, btck_chainstate_manager_options_destroy>
 {
 public:
-    ChainstateManagerOptions(const Context& context, const std::string& data_dir, const std::string& blocks_dir)
-        : UniqueHandle{btck_chainstate_manager_options_create(context.get(), data_dir.c_str(), data_dir.length(), blocks_dir.c_str(), blocks_dir.length())}
+    ChainstateManagerOptions(const Context& context, std::string_view data_dir, std::string_view blocks_dir)
+        : UniqueHandle{btck_chainstate_manager_options_create(
+              context.get(), data_dir.data(), data_dir.length(), blocks_dir.data(), blocks_dir.length())}
     {
     }
 
@@ -970,11 +1066,6 @@ class ChainView : public View<btck_Chain>
 public:
     explicit ChainView(const btck_Chain* ptr) : View{ptr} {}
 
-    BlockTreeEntry Tip() const
-    {
-        return btck_chain_get_tip(get());
-    }
-
     int32_t Height() const
     {
         return btck_chain_get_height(get());
@@ -983,11 +1074,6 @@ public:
     int CountEntries() const
     {
         return btck_chain_get_height(get()) + 1;
-    }
-
-    BlockTreeEntry Genesis() const
-    {
-        return btck_chain_get_genesis(get());
     }
 
     BlockTreeEntry GetByHeight(int height) const
@@ -1134,6 +1220,11 @@ public:
         return res == 0;
     }
 
+    bool ProcessBlockHeader(const BlockHeader& header, BlockValidationState& state)
+    {
+        return btck_chainstate_manager_process_block_header(get(), header.get(), state.get()) == 0;
+    }
+
     ChainView GetChain() const
     {
         return ChainView{btck_chainstate_manager_get_active_chain(get())};
@@ -1144,6 +1235,11 @@ public:
         auto entry{btck_chainstate_manager_get_block_tree_entry_by_hash(get(), block_hash.get())};
         if (!entry) return std::nullopt;
         return entry;
+    }
+
+    BlockTreeEntry GetBestEntry() const
+    {
+        return btck_chainstate_manager_get_best_entry(get());
     }
 
     std::optional<Block> ReadBlock(const BlockTreeEntry& entry) const

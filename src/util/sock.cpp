@@ -2,11 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <util/sock.h>
+
 #include <common/system.h>
 #include <compat/compat.h>
-#include <logging.h>
+#include <span.h>
 #include <tinyformat.h>
-#include <util/sock.h>
+#include <util/log.h>
 #include <util/syserror.h>
 #include <util/threadinterrupt.h>
 #include <util/time.h>
@@ -409,7 +411,7 @@ void Sock::Close()
     int ret = close(m_socket);
 #endif
     if (ret) {
-        LogPrintf("Error closing socket %d: %s\n", m_socket, NetworkErrorString(WSAGetLastError()));
+        LogWarning("Error closing socket %d: %s", m_socket, NetworkErrorString(WSAGetLastError()));
     }
     m_socket = INVALID_SOCKET;
 }

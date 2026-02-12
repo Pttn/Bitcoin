@@ -185,7 +185,7 @@ static RPCHelpMan uptime()
                 },
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
 {
-    return GetTime() - GetStartupTime();
+    return TicksSeconds(GetUptime());
 }
     };
 }
@@ -220,7 +220,7 @@ static RPCHelpMan getrpcinfo()
     for (const RPCCommandExecutionInfo& info : g_rpc_server_info.active_commands) {
         UniValue entry(UniValue::VOBJ);
         entry.pushKV("method", info.method);
-        entry.pushKV("duration", int64_t{Ticks<std::chrono::microseconds>(SteadyClock::now() - info.start)});
+        entry.pushKV("duration", Ticks<std::chrono::microseconds>(SteadyClock::now() - info.start));
         active_commands.push_back(std::move(entry));
     }
 

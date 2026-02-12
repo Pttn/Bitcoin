@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The Bitcoin Core developers
+// Copyright (c) 2024-present The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -24,7 +24,7 @@ static const int P2WPKH_OUTPUT_VSIZE = 31;
 static CoinSelectionParams init_default_params()
 {
     CoinSelectionParams dcsp{
-        /*rng_fast*/default_rand,
+        /*rng_fast=*/default_rand,
         /*change_output_size=*/P2WPKH_OUTPUT_VSIZE,
         /*change_spend_size=*/P2WPKH_INPUT_VSIZE,
         /*min_change_target=*/50'000,

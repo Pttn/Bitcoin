@@ -22,9 +22,11 @@ P2PTxInvStore: A p2p interface class that inherits from P2PDataStore, and keeps
 
 import asyncio
 from collections import defaultdict
+import ipaddress
 from io import BytesIO
 import logging
 import platform
+import socket
 import struct
 import sys
 import threading
@@ -76,6 +78,9 @@ from test_framework.messages import (
     MAGIC_BYTES,
     sha256,
 )
+from test_framework.netutil import (
+    set_ephemeral_port_range,
+)
 from test_framework.util import (
     assert_not_equal,
     MAX_NODES,
@@ -91,10 +96,9 @@ from test_framework.v2_p2p import (
 logger = logging.getLogger("TestFramework.p2p")
 
 # The minimum P2P version that this test framework supports
-MIN_P2P_VERSION_SUPPORTED = 60001
+MIN_P2P_VERSION_SUPPORTED = 70016
 # The P2P version that this test framework implements and sends in its `version` message
-# Version 70016 supports wtxid relay
-P2P_VERSION = 70016
+P2P_VERSION = 251200
 # The services that this test framework offers in its `version` message
 P2P_SERVICES = NODE_NETWORK | NODE_WITNESS
 # The P2P user agent string that this test framework sends in its `version` message
@@ -743,7 +747,7 @@ class NetworkThread(threading.Thread):
         """Start the network thread."""
         self.network_event_loop.run_forever()
 
-    def close(self, *, timeout=10):
+    def close(self, *, timeout):
         """Close the connections and network event loop."""
         self.network_event_loop.call_soon_threadsafe(self.network_event_loop.stop)
         wait_until_helper_internal(lambda: not self.network_event_loop.is_running(), timeout=timeout)
@@ -787,13 +791,28 @@ class NetworkThread(threading.Thread):
                 cls.protos[(addr, port)] = None
             return response
 
-        if (addr, port) not in cls.listeners:
+        if port == 0 or (addr, port) not in cls.listeners:
             # When creating a listener on a given (addr, port) we only need to
             # do it once. If we want different behaviors for different
             # connections, we can accomplish this by providing different
             # `proto` functions
 
-            listener = await cls.network_event_loop.create_server(peer_protocol, addr, port)
+            if port == 0:
+                # Manually create the socket in order to set the range to be
+                # used for the port before the bind() call.
+                if ipaddress.ip_address(addr).version == 4:
+                    address_family = socket.AF_INET
+                else:
+                    address_family = socket.AF_INET6
+                s = socket.socket(address_family)
+                set_ephemeral_port_range(s)
+                s.bind((addr, 0))
+                s.listen()
+                listener = await cls.network_event_loop.create_server(peer_protocol, sock=s)
+                port = listener.sockets[0].getsockname()[1]
+            else:
+                listener = await cls.network_event_loop.create_server(peer_protocol, addr, port)
+
             logger.debug("Listening server on %s:%d should be started" % (addr, port))
             cls.listeners[(addr, port)] = listener
 

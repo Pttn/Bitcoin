@@ -44,7 +44,7 @@ class FuzzedHeadersSyncState : public HeadersSyncState
 {
 public:
     FuzzedHeadersSyncState(const HeadersSyncParams& sync_params, const size_t commit_offset,
-                           const CBlockIndex* chain_start, const arith_uint256& minimum_required_work)
+                           const CBlockIndex& chain_start, const arith_uint256& minimum_required_work)
         : HeadersSyncState(/*id=*/0, Params().GetConsensus(), sync_params, chain_start, minimum_required_work)
     {
         const_cast<size_t&>(m_commit_offset) = commit_offset;
@@ -55,13 +55,11 @@ FUZZ_TARGET(headers_sync_state, .init = initialize_headers_sync_state_fuzz)
 {
     SeedRandomStateForTest(SeedRand::ZEROS);
     FuzzedDataProvider fuzzed_data_provider(buffer.data(), buffer.size());
-    auto mock_time{ConsumeTime(fuzzed_data_provider)};
 
     CBlockHeader genesis_header{Params().GenesisBlock()};
     CBlockIndex start_index(genesis_header);
 
-    if (mock_time < start_index.GetMedianTimePast()) return;
-    SetMockTime(mock_time);
+    SetMockTime(ConsumeTime(fuzzed_data_provider, /*min=*/start_index.GetMedianTimePast()));
 
     const uint256 genesis_hash = genesis_header.GetHash();
     start_index.phashBlock = &genesis_hash;
@@ -74,7 +72,7 @@ FUZZ_TARGET(headers_sync_state, .init = initialize_headers_sync_state_fuzz)
     FuzzedHeadersSyncState headers_sync(
         params,
         /*commit_offset=*/fuzzed_data_provider.ConsumeIntegralInRange<size_t>(0, params.commitment_period - 1),
-        /*chain_start=*/&start_index,
+        /*chain_start=*/start_index,
         /*minimum_required_work=*/min_work);
 
     // Store headers for potential redownload phase.
