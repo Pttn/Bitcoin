@@ -2495,9 +2495,12 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
              Ticks<SecondsDouble>(m_chainman.time_connect),
              Ticks<MillisecondsDouble>(m_chainman.time_connect) / m_chainman.num_blocks_total);
 
-    CAmount blockReward = GetBlockSubsidy(pindex->nHeight, params.GetConsensus()) + nFees/2; // At least half of Fees must be Burnt.
-    if (params.GetConsensus().fork2Height == 1482768 && pindex->nHeight < 2142898) // Only effective about 1 month after 24.04 Release in MainNet.
-        blockReward = nFees + GetBlockSubsidy(pindex->nHeight, params.GetConsensus());
+    CAmount base_subsidy = GetBlockSubsidy(pindex->nHeight, params.GetConsensus());
+    CAmount blockReward = std::min(std::max(4*base_subsidy, COIN), base_subsidy + nFees/2); // At least half of Fees must be Burnt, and everything over 4x the Reward or 1 RIC (whichever is greater).
+    if (params.GetConsensus().fork2Height == 1482768 && pindex->nHeight < 2530000) // Reward Cap only effective about 1 month after 2602 Release in MainNet.
+        blockReward = base_subsidy + nFees/2;
+    if (params.GetConsensus().fork2Height == 1482768 && pindex->nHeight < 2142898) // Half Fees to Burn only effective about 1 month after 2404 Release in MainNet.
+        blockReward = base_subsidy + nFees;
     if (block.vtx[0]->GetValueOut() > blockReward && state.IsValid()) {
         state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
                       strprintf("coinbase pays too much (actual=%d vs limit=%d)", block.vtx[0]->GetValueOut(), blockReward));

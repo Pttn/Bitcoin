@@ -156,7 +156,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock()
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = m_options.coinbase_output_script;
     // Block subsidy + fees
-    const CAmount block_reward{nFees/2 + GetBlockSubsidy(nHeight, chainparams.GetConsensus())};
+    const CAmount base_subsidy{GetBlockSubsidy(nHeight, chainparams.GetConsensus())};
+    const CAmount block_reward{std::min(std::max(4*base_subsidy, COIN), base_subsidy + nFees/2)};
     coinbaseTx.vout[0].nValue = block_reward;
     coinbase_tx.block_reward_remaining = block_reward;
 
